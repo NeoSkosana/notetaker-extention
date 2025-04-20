@@ -1,0 +1,11 @@
+/* popup.css - Notetaker Chrome Extension */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background: #f4f6f8;
+    min-width: 350px;
+    min-height: 500px;
+}
+#app {
+    padding: 16px;
+}
