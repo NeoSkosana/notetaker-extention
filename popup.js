@@ -1,5 +1,5 @@
 // popup.js - Notetaker Chrome Extension
-// This file will handle UI rendering, CRUD logic, and speech recognition
+// This file will handle UI rendering, CRUD logic
 
 // Mock data for sections and notes
 const mockSections = [
@@ -61,7 +61,11 @@ function renderSidebar(sections, notes) {
       <ul class="notes-list" id="notes-list-${section.id}">`;
     notes.filter(note => note.sectionId === section.id).forEach(note => {
       const selectedClass = note.id === selectedNoteId ? ' selected-note' : '';
-      html += `<li class="note-title${selectedClass}" data-note-id="${note.id}">${note.title}</li>`;
+      html += `<li class="note-title${selectedClass}" data-note-id="${note.id}" title="${note.title}">${note.title}
+        <button class="icon-btn quick-delete-note-btn" aria-label="Delete note" data-note-id="${note.id}" style="background:none;border:none;cursor:pointer;padding:0;margin-left:auto;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+        </button>
+      </li>`;
     });
     html += '</ul></div>';
   });
@@ -158,6 +162,19 @@ function attachSidebarListeners() {
       deleteSection(sectionId);
     });
   });
+  document.querySelectorAll('.quick-delete-note-btn').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const noteId = parseInt(this.getAttribute('data-note-id'));
+      if (confirm('Delete this note?')) {
+        window.notes = window.notes.filter(n => n.id !== noteId);
+        saveData(window.sections, window.notes);
+        document.querySelector('.sidebar-container').innerHTML = renderSidebar(window.sections, window.notes);
+        document.querySelector('.main-panel-container').innerHTML = renderMainPanel(window.notes);
+        attachSidebarListeners();
+      }
+    });
+  });
   attachMainPanelListeners();
 }
 
@@ -199,19 +216,19 @@ window.editNote = function(noteId) {
     <form id="edit-note-form">
       <div class="form-group">
         <label>Title</label>
-        <input type="text" name="title" value="${note.title}" required style="width:100%;padding:8px;margin-bottom:8px;">
+        <input type="text" name="title" id="edit-title-field" value="${note.title}" required style="width:100%;padding:8px;margin-bottom:8px;">
       </div>
       <div class="form-group">
         <label>Summary</label>
-        <input type="text" name="summary" value="${note.summary}" style="width:100%;padding:8px;margin-bottom:8px;">
+        <input type="text" name="summary" id="edit-summary-field" value="${note.summary}" style="width:100%;padding:8px;margin-bottom:8px;">
       </div>
       <div class="form-group">
         <label>Keywords</label>
-        <input type="text" name="keywords" value="${note.keywords}" style="width:100%;padding:8px;margin-bottom:8px;">
+        <input type="text" name="keywords" id="edit-keywords-field" value="${note.keywords}" style="width:100%;padding:8px;margin-bottom:8px;">
       </div>
       <div class="form-group">
         <label>Content</label>
-        <textarea name="content" rows="4" style="width:100%;padding:8px;margin-bottom:8px;">${note.content}</textarea>
+        <textarea name="content" id="edit-content-field" rows="4" style="width:100%;padding:8px;margin-bottom:8px;">${note.content}</textarea>
       </div>
       <button type="submit" style="background:#1e90ff;color:#fff;padding:10px 24px;border:none;border-radius:4px;cursor:pointer;">Save</button>
       <button type="button" id="cancel-edit-btn" style="margin-left:8px;padding:10px 24px;border:none;border-radius:4px;cursor:pointer;">Cancel</button>
@@ -261,7 +278,7 @@ function showNewNoteForm() {
     <form id="new-note-form">
       <div class="form-group">
         <label>Title</label>
-        <input type="text" name="title" required style="width:100%;padding:8px;margin-bottom:8px;">
+        <input type="text" name="title" id="note-title-field" required style="width:100%;padding:8px;margin-bottom:8px;">
       </div>
       <div class="form-group">
         <label>Section</label>
@@ -273,15 +290,15 @@ function showNewNoteForm() {
       </div>
       <div class="form-group">
         <label>Summary</label>
-        <input type="text" name="summary" style="width:100%;padding:8px;margin-bottom:8px;">
+        <input type="text" name="summary" id="note-summary-field" style="width:100%;padding:8px;margin-bottom:8px;">
       </div>
       <div class="form-group">
         <label>Keywords</label>
-        <input type="text" name="keywords" style="width:100%;padding:8px;margin-bottom:8px;">
+        <input type="text" name="keywords" id="note-keywords-field" style="width:100%;padding:8px;margin-bottom:8px;">
       </div>
       <div class="form-group">
         <label>Content</label>
-        <textarea name="content" rows="4" style="width:100%;padding:8px;margin-bottom:8px;"></textarea>
+        <textarea name="content" id="note-content-field" rows="4" style="width:100%;padding:8px;margin-bottom:8px;"></textarea>
       </div>
       <button type="submit" style="background:#1e90ff;color:#fff;padding:10px 24px;border:none;border-radius:4px;cursor:pointer;">Create</button>
       <button type="button" id="cancel-new-btn" style="margin-left:8px;padding:10px 24px;border:none;border-radius:4px;cursor:pointer;">Cancel</button>
